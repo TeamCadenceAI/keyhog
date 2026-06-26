@@ -115,7 +115,7 @@ indexmap = "=2.7.1"
 notify = "=8.0.0"
 
 # Performance libraries
-simdsieve = { git = "https://github.com/TeamCadenceAI/simdsieve.git", rev = "e5aa593" }
+simdsieve = { git = "https://github.com/TeamCadenceAI/simdsieve.git", rev = "e5aa593ea65f3196677a618afd8117ba63c322c3" }
 # vyre 0.6.1 is published to crates.io. The vendor/vyre/ tree stays in
 # place for offline/local development and is excluded from the workspace
 # (`exclude` above); to re-pin path overrides for an unreleased vyre,

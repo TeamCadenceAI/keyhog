@@ -4527,7 +4527,7 @@ checksum = "703d5c7ef118737c72f1af64ad2f6f8c5e1921f818cdcb97b8fe6fc69bf66214"
 [[package]]
 name = "simdsieve"
 version = "0.1.1"
-source = "git+https://github.com/TeamCadenceAI/simdsieve.git?rev=e5aa593#e5aa593ea65f3196677a618afd8117ba63c322c3"
+source = "git+https://github.com/TeamCadenceAI/simdsieve.git?rev=e5aa593ea65f3196677a618afd8117ba63c322c3#e5aa593ea65f3196677a618afd8117ba63c322c3"
 
 [[package]]
 name = "similar"
