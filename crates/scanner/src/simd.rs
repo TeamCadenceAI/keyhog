@@ -48,6 +48,24 @@ pub(crate) mod backend {
     /// against a different database.
     static SCANNER_ID_SEQ: AtomicU64 = AtomicU64::new(0);
 
+    #[cfg(unix)]
+    fn current_user_temp_cache_dir() -> PathBuf {
+        // SAFETY: geteuid() is a trivial syscall with no memory safety
+        // preconditions and always succeeds on Unix platforms.
+        let uid = unsafe { libc::geteuid() };
+        PathBuf::from(format!("/tmp/keyhog-cache-{uid}"))
+    }
+
+    #[cfg(windows)]
+    fn current_user_temp_cache_dir() -> PathBuf {
+        std::env::temp_dir().join("keyhog-cache")
+    }
+
+    #[cfg(not(any(unix, windows)))]
+    fn current_user_temp_cache_dir() -> PathBuf {
+        std::env::temp_dir().join("keyhog-cache")
+    }
+
     /// One compiled shard: its database plus a Mutex-guarded scratch pool. Each
     /// `Scratch` is tied to exactly one `BlockDatabase`, so the pools are
     /// per-shard.
@@ -141,10 +159,7 @@ pub(crate) mod backend {
                 let dir = if let Ok(custom) = std::env::var("KEYHOG_CACHE_DIR") {
                     let path = PathBuf::from(custom);
                     let home = dirs::home_dir().ok_or("Fix: Could not determine HOME directory")?;
-                    // SAFETY: geteuid() is a trivial syscall with no memory
-                    // safety preconditions and always succeeds on Linux/macOS.
-                    let uid = unsafe { libc::geteuid() };
-                    let tmp_user_dir = PathBuf::from(format!("/tmp/keyhog-cache-{}", uid));
+                    let tmp_user_dir = current_user_temp_cache_dir();
 
                     if !path.starts_with(&home) && !path.starts_with(&tmp_user_dir) {
                         return Err(format!(
@@ -164,11 +179,9 @@ pub(crate) mod backend {
                     // ~/.cache/keyhog (XDG_CACHE_HOME) survives reboots. Falls
                     // back to the /tmp dir only when no home/cache directory is
                     // resolvable (minimal containers, locked-down sandboxes).
-                    // SAFETY: see geteuid() above - trivial syscall.
-                    let uid = unsafe { libc::geteuid() };
                     match dirs::cache_dir() {
                         Some(cache) => cache.join("keyhog"),
-                        None => PathBuf::from(format!("/tmp/keyhog-cache-{}", uid)),
+                        None => current_user_temp_cache_dir(),
                     }
                 };
 
